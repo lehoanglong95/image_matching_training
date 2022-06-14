@@ -19,7 +19,7 @@ class SimpleModel(nn.Module):
 
     def __init__(self):
         super(SimpleModel, self).__init__()
-        self.backbone = EfficientNet.from_pretrained("efficientnet-b2")
+        self.backbone = EfficientNet.from_pretrained("efficientnet-b3")
         self.last_layer = nn.AdaptiveAvgPool2d(1)
 
     def forward(self, input):
@@ -28,7 +28,7 @@ class SimpleModel(nn.Module):
         return output
 
 if __name__ == '__main__':
-    composed = transforms.Compose([Rescale(512), ToTensor()])
+    composed = transforms.Compose([Rescale(300), ToTensor()])
     df = pd.read_parquet('./input_file/final_final_product_image.parquet')
     image_matching_dataset = ImageMatchingDataset(df, root_dir="/home/longle/images/images/",
                                                   source_image_key="normalized_url_image",

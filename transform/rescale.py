@@ -29,9 +29,9 @@ class Rescale(object):
         else:
             h, w = image.shape[:2]
             if isinstance(self.output_size, int):
-                h_ratio = h / self.output_size if h / self.output_size > 1 else 1 / (h / self.output_size)
-                w_ratio = w / self.output_size if w / self.output_size > 1 else 1 / (w / self.output_size)
-                if h_ratio.is_integer() and w_ratio.is_integer():
+                # h_ratio = h / self.output_size if h / self.output_size > 1 else 1 / (h / self.output_size)
+                # w_ratio = w / self.output_size if w / self.output_size > 1 else 1 / (w / self.output_size)
+                if h == w:
                     try:
                         return rescale(image, (h / self.output_size, w / self.output_size, 1))
                     except Exception as e:
