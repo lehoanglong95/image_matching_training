@@ -19,7 +19,7 @@ class SimpleModel(nn.Module):
 
     def __init__(self):
         super(SimpleModel, self).__init__()
-        self.backbone = EfficientNet.from_pretrained("efficientnet-b4")
+        self.backbone = EfficientNet.from_pretrained("efficientnet-b2")
         self.last_layer = nn.AdaptiveAvgPool2d(1)
 
     def forward(self, input):
@@ -30,10 +30,10 @@ class SimpleModel(nn.Module):
 if __name__ == '__main__':
     composed = transforms.Compose([Rescale(512), ToTensor()])
     df = pd.read_parquet('./input_file/final_final_product_image.parquet')
-    image_matching_dataset = ImageMatchingDataset(df, root_dir="/data/long.le3/image_matching/images/",
+    image_matching_dataset = ImageMatchingDataset(df, root_dir="/home/longle/images/images/",
                                                   source_image_key="normalized_url_image",
                                                   des_image_key="normalized_url_image", transform=composed)
-    dataloader = DataLoader(image_matching_dataset, batch_size=1, shuffle=False, num_workers=2)
+    dataloader = DataLoader(image_matching_dataset, batch_size=2, shuffle=False, num_workers=2)
     model = SimpleModel()
     if torch.cuda.device_count() > 1:
         model = nn.DataParallel(model)
