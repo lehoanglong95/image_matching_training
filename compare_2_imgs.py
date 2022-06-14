@@ -17,7 +17,7 @@ if torch.cuda.is_available():
 
 class SimpleModel(nn.Module):
 
-    def __init__(self, input_size, output_size):
+    def __init__(self):
         super(SimpleModel, self).__init__()
         self.backbone = EfficientNet.from_pretrained("efficientnet-b4")
         self.last_layer = nn.AdaptiveAvgPool2d(1)
@@ -50,8 +50,9 @@ if __name__ == '__main__':
                 embeddings.append(False)
                 continue
             # image = torch.unsqueeze(input_image[0], dim=0)
-            source_embeds = model.extract_features(input_image.type(torch.cuda.FloatTensor))
-            source_embeds = last_layer(source_embeds)
+            source_embeds = model(input_image.type(torch.cuda.FloatTensor).to(device))
+            # source_embeds = model.extract_features(input_image.type(torch.cuda.FloatTensor))
+            # source_embeds = last_layer(source_embeds)
             # print(source_embeds.shape)
             # source_embeds = source_embeds.view(2, -1)
             for embed in source_embeds:
