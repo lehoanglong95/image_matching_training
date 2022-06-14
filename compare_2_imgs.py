@@ -22,9 +22,11 @@ if __name__ == '__main__':
                                                   source_image_key="normalized_url_image",
                                                   des_image_key="normalized_url_image", transform=composed)
     dataloader = DataLoader(image_matching_dataset, batch_size=1, shuffle=False, num_workers=2)
-    model = EfficientNet.from_pretrained("efficientnet-b4").to(device)
-    last_layer = nn.AdaptiveAvgPool2d(1).to(device)
-    layers = [model, nn.AdaptiveAvgPool2d(1)]
+    model = EfficientNet.from_pretrained("efficientnet-b4")
+    net = torch.nn.DataParallel(model, device_ids=[0, 1])
+    last_layer = nn.AdaptiveAvgPool2d(1)
+    last_layer = torch.nn.DataParallel(model, device_ids=[0, 1])
+    # layers = [model, nn.AdaptiveAvgPool2d(1)]
     # net = nn.Sequential(*layers).to(device)
     errors_data = []
     embeddings = []
@@ -38,7 +40,7 @@ if __name__ == '__main__':
                 embeddings.append(False)
                 continue
             # image = torch.unsqueeze(input_image[0], dim=0)
-            source_embeds = model.extract_features(input_image.type(torch.cuda.FloatTensor).to(device))
+            source_embeds = model.extract_features(input_image)
             source_embeds = last_layer(source_embeds)
             # print(source_embeds.shape)
             # source_embeds = source_embeds.view(2, -1)
