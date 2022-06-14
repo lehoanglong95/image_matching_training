@@ -13,7 +13,19 @@ from collections import defaultdict
 
 device = torch.device("cpu")
 if torch.cuda.is_available():
-    device = torch.device("cuda")
+    device = torch.device("cuda:0")
+
+class SimpleModel(nn.Module):
+
+    def __init__(self, input_size, output_size):
+        super(SimpleModel, self).__init__()
+        self.backbone = EfficientNet.from_pretrained("efficientnet-b4")
+        self.last_layer = nn.AdaptiveAvgPool2d(1)
+
+    def forward(self, input):
+        output = self.backbone.extract_features(input)
+        output = self.last_layer(output)
+        return output
 
 if __name__ == '__main__':
     composed = transforms.Compose([Rescale(512), ToTensor()])
@@ -22,12 +34,10 @@ if __name__ == '__main__':
                                                   source_image_key="normalized_url_image",
                                                   des_image_key="normalized_url_image", transform=composed)
     dataloader = DataLoader(image_matching_dataset, batch_size=1, shuffle=False, num_workers=2)
-    model = EfficientNet.from_pretrained("efficientnet-b4")
-    net = torch.nn.DataParallel(model, device_ids=[0, 1])
-    last_layer = nn.AdaptiveAvgPool2d(1)
-    last_layer = torch.nn.DataParallel(model, device_ids=[0, 1])
-    # layers = [model, nn.AdaptiveAvgPool2d(1)]
-    # net = nn.Sequential(*layers).to(device)
+    model = SimpleModel()
+    if torch.cuda.device_count() > 1:
+        model = nn.DataParallel(model)
+    model.to(device)
     errors_data = []
     embeddings = []
     for i, sample_batched in enumerate(dataloader):
@@ -40,14 +50,14 @@ if __name__ == '__main__':
                 embeddings.append(False)
                 continue
             # image = torch.unsqueeze(input_image[0], dim=0)
-            source_embeds = model.extract_features(input_image)
+            source_embeds = model.extract_features(input_image.type(torch.cuda.FloatTensor))
             source_embeds = last_layer(source_embeds)
             # print(source_embeds.shape)
             # source_embeds = source_embeds.view(2, -1)
             for embed in source_embeds:
                 embeddings.append(embed)
         except Exception as e:
-            # print(f"PROCESS {i}: {e}")
+            print(f"PROCESS {i}: {e}")
             errors_data.append(i)
             embeddings.append(False)
             continue
