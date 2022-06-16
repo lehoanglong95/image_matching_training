@@ -8,10 +8,10 @@ def get_features(model, val_loader):
     di = {}
     for data in val_loader:
         img_url = data["img_url"]
-        image = data["image"]
+        image = data["image"].type(torch.cuda.FloatTensor)
         features = model(image)
         features = features.view(image.shape[0], -1)
-        for i in range(len(image.shape[0])):
+        for i in range(len(range(image.shape[0]))):
             di[img_url[i]] = features[i].cpu().detach().numpy()
     return di
 

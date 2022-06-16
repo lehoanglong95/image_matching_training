@@ -17,10 +17,12 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 from test import *
 from transform.rescale import Rescale
 from transform.to_tensor import ToTensor
+from transform.normalize import Normalize
 from torchvision.transforms import transforms
 from utils.visualizer import Visualizer
 from validate import calculate_acc
 from modules.focal_loss import FocalLoss
+from transform.train_transform import get_train_transform, get_val_transform
 
 CONFIG_PATH = "./configs"
 def save_model(model, save_path, name, iter_cnt):
@@ -41,12 +43,11 @@ if __name__ == '__main__':
     train_config = config["train"]
     eval_config = config["evaluate"]
     dataset_config = train_config["dataset"]
-    composed = transforms.Compose([Rescale(train_config["data_augmentation"]["output_shape"]), ToTensor()])
     train_dataset = ImageMatchingDataset(dataset_config["input_file"],
                                          dataset_config["root_dir"],
                                          dataset_config["image_key"],
                                          dataset_config["label_key"],
-                                         composed)
+                                         get_train_transform())
     trainloader = data.DataLoader(train_dataset,
                                   batch_size=train_config["batch_size"],
                                   shuffle=train_config["shuffle"],
@@ -57,7 +58,7 @@ if __name__ == '__main__':
                                          eval_dataset_config["first_image_key"],
                                          eval_dataset_config["second_image_key"],
                                          eval_dataset_config["pair_key"],
-                                         composed)
+                                         get_val_transform())
     valloader = data.DataLoader(val_dataset,
                                   batch_size=eval_config["batch_size"],
                                   shuffle=eval_config["shuffle"],

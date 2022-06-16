@@ -1,19 +1,22 @@
 from skimage.transform import rescale, resize
 from skimage.color import gray2rgb
+from torchvision import transforms
 
 class Rescale(object):
 
     def __init__(self, output_size=512):
         assert isinstance(output_size, (int, tuple))
         self.output_size = output_size
+        self.resize = transforms.Resize(output_size)
 
     def __call__(self, sample):
         source_image = sample["image"]
-        new_source_image = self.__resize(source_image)
-        if new_source_image.shape == (self.output_size, self.output_size, 3):
-            return {"image": new_source_image}
-        else:
-            return {"image": self.__resize(source_image, True)}
+        return {"image": self.resize(source_image)}
+        # new_source_image = self.__resize(source_image)
+        # if new_source_image.shape == (self.output_size, self.output_size, 3):
+        #     return {"image": new_source_image}
+        # else:
+        #     return {"image": self.__resize(source_image, True)}
 
     def __resize(self, image, force_resize=False):
         if len(image.shape) < 3:

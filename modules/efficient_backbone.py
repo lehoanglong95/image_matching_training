@@ -14,7 +14,7 @@ class EfficientBackbone(nn.Module):
 
     def forward(self, input):
         output = self.backbone.extract_features(input)
-        output = self.last_layer(output)
         output = self.batchnorm(output)
-        output = output.view(8, -1)
+        output = self.last_layer(output)
+        output = output.view(input.shape[0], -1)
         return output

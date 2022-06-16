@@ -1,12 +1,5 @@
 from __future__ import print_function, division
-import os
-import torch
-import pandas as pd
-from skimage import io, transform
-import numpy as np
-import matplotlib.pyplot as plt
 from torch.utils.data import Dataset, DataLoader
-from torchvision import transforms, utils
 from torch.utils import data
 
 import torch
@@ -14,7 +7,7 @@ from test import *
 from transform.rescale import Rescale
 from transform.to_tensor import ToTensor
 from torchvision.transforms import transforms
-
+from skimage.color import gray2rgb
 
 class ImageMatchingValDataset(Dataset):
 
@@ -39,17 +32,20 @@ class ImageMatchingValDataset(Dataset):
         return pd.DataFrame()
 
     def __len__(self):
-        return len(self.df)
+        return len(self.image_url_df)
 
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
             idx = idx.tolist()
         img_url = os.path.join(self.root_dir, self.image_url_df.iloc[idx]["image_url"])
-        source_image = io.imread(img_url)
-        sample = {"image": source_image}
+        image = io.imread(img_url)
+        if len(image.shape) < 3:
+            image = gray2rgb(image)
+        if image.shape[2] == 4:
+            image = image[:, :, :3]
         if self.transform:
-            sample = self.transform(sample)
-        return {"image": sample["image"], "img_url": self.image_url_df.iloc[idx]["image_url"]}
+            image = self.transform(image=image)
+        return {"image": image["image"], "img_url": self.image_url_df.iloc[idx]["image_url"]}
 
 if __name__ == '__main__':
     composed = transforms.Compose([Rescale(380), ToTensor()])
