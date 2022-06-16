@@ -51,11 +51,12 @@ if __name__ == '__main__':
                                   batch_size=train_config["batch_size"],
                                   shuffle=train_config["shuffle"],
                                   num_workers=train_config["num_workers"])
-    val_dataset = ImageMatchingValDataset(eval_config["input_file"],
-                                         eval_config["root_dir"],
-                                         eval_config["first_image_key"],
-                                         eval_config["second_image_key"],
-                                         eval_config["pair_key"],
+    eval_dataset_config = eval_config["dataset"]
+    val_dataset = ImageMatchingValDataset(eval_dataset_config["input_file"],
+                                         eval_dataset_config["root_dir"],
+                                         eval_dataset_config["first_image_key"],
+                                         eval_dataset_config["second_image_key"],
+                                         eval_dataset_config["pair_key"],
                                          composed)
     valloader = data.DataLoader(val_dataset,
                                   batch_size=eval_config["batch_size"],
@@ -78,33 +79,30 @@ if __name__ == '__main__':
     else:
         metric_fc = nn.Linear(model_config["backbone_output"], model_config["num_classes"])
 
-    print(model)
-    model.to(device)
-    model = DataParallel(model)
-    metric_fc.to(device)
-    metric_fc = DataParallel(metric_fc)
+    # print(model)
 
     if config["optimizer"]["name"] == 'sgd':
         optimizer = torch.optim.SGD([{'params': model.parameters()}, {'params': metric_fc.parameters()}],
                                     lr=config["optimizer"]["lr"], weight_decay=config["optimizer"]["weight_decay"])
     else:
         optimizer = torch.optim.Adam([{'params': model.parameters()}, {'params': metric_fc.parameters()}],
-                                     lr=config["optimizer"]["lr"], weight_decay=config["optimizer"]["weight_decay"])
+                                     lr=config["optimizer"]["lr"], weight_decay=float(config["optimizer"]["weight_decay"]))
     scheduler = ReduceLROnPlateau(optimizer, mode=config["scheduler"]["mode"],
                                     factor=config["scheduler"]["factor"],
                                     patience=config["scheduler"]["patience"])
-
     start = time.time()
     best_acc = 0
     if torch.cuda.device_count() > 1:
         model = nn.DataParallel(model)
+        metric_fc = DataParallel(metric_fc)
     model.to(device)
+    metric_fc.to(device)
     for i in range(train_config["epochs"]):
         model.train()
         for ii, data in enumerate(trainloader):
             data_input, label = data["image"], data["label"]
             data_input = data_input.type(torch.cuda.FloatTensor).to(device)
-            label = label.to(device).long()
+            label = label.long().to(device)
             feature = model(data_input)
             output = metric_fc(feature, label)
             loss = criterion(output, label)
@@ -118,8 +116,6 @@ if __name__ == '__main__':
                 output = output.data.cpu().numpy()
                 output = np.argmax(output, axis=1)
                 label = label.data.cpu().numpy()
-                # print(output)
-                # print(label)
                 acc = np.mean((output == label).astype(int))
                 speed = train_config["print_freq"] / (time.time() - start)
                 time_str = time.asctime(time.localtime(time.time()))

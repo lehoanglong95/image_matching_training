@@ -10,8 +10,11 @@ class EfficientBackbone(nn.Module):
         else:
             self.backbone = EfficientNet.from_name(backbone_name)
         self.last_layer = nn.AdaptiveAvgPool2d(1)
+        self.batchnorm = nn.BatchNorm2d(1792)
 
     def forward(self, input):
-        output = self.backbone(input)
+        output = self.backbone.extract_features(input)
         output = self.last_layer(output)
-        return output.view(input.shape[0], -1)
+        output = self.batchnorm(output)
+        output = output.view(8, -1)
+        return output
