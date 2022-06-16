@@ -96,11 +96,14 @@ if __name__ == '__main__':
 
     start = time.time()
     best_acc = 0
+    if torch.cuda.device_count() > 1:
+        model = nn.DataParallel(model)
+    model.to(device)
     for i in range(train_config["epochs"]):
         model.train()
         for ii, data in enumerate(trainloader):
             data_input, label = data["image"], data["label"]
-            data_input = data_input.to(device)
+            data_input = data_input.type(torch.cuda.FloatTensor).to(device)
             label = label.to(device).long()
             feature = model(data_input)
             output = metric_fc(feature, label)
