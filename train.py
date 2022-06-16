@@ -35,7 +35,7 @@ def load_config(config_name):
 
 if __name__ == '__main__':
     config = load_config("config.yaml")
-    device = torch.device("cuda")
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     if config["display"]:
         visualizer = Visualizer()
     train_config = config["train"]
@@ -95,8 +95,8 @@ if __name__ == '__main__':
     if torch.cuda.device_count() > 1:
         model = nn.DataParallel(model)
         metric_fc = DataParallel(metric_fc)
-    # model.to(device)
-    # metric_fc.to(device)
+    model.to(device)
+    metric_fc.to(device)
     for i in range(train_config["epochs"]):
         model.train()
         for ii, data in enumerate(trainloader):
