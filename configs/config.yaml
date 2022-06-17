@@ -6,11 +6,11 @@ scheduler:
   name: ReduceLROnPlateau
   mode: max
   factor: 0.2
-  patience: 4
+  patience: 5
 model:
   backbone_name: efficientnet-b4
   metric: arc_margin
-  num_classes: 1105
+  num_classes: 10464
   pretrain: True
   backbone_output: 1792
 
@@ -18,12 +18,12 @@ loss: focal_loss
 train:
   print_freq: 10 # print info every N batch
   dataset:
-    input_file: ./input_file/small_train_set.parquet
-    root_dir: /data/long.le3/image_matching/images/
+    input_file: ./input_file/small_train_set_10464_classes.parquet
+    root_dir: /home/longle/images/images/
     image_key: normalized_url_image
     label_key: train_label_new
   num_workers: 4
-  batch_size: 16
+  batch_size: 24
   shuffle: True
   epochs: 300
   data_augmentation:
@@ -32,8 +32,8 @@ train:
 evaluate:
   batch_size: 8
   dataset:
-    input_file: ./input_file/small_val_set_pair.parquet # size: 5000
-    root_dir: /data/long.le3/image_matching/images/
+    input_file: ./input_file/very_small_val_set_pair.parquet # size: 5000
+    root_dir: /home/longle/images/images/
     first_image_key: first_image_file_name
     second_image_key: second_image_file_name
     pair_key: pair_result
