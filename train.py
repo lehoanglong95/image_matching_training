@@ -1,33 +1,26 @@
 from __future__ import print_function
-import os
 from dataset.image_matching_dataset import ImageMatchingDataset
 from dataset.image_matching_val_dataset import ImageMatchingValDataset
-import torch
 from torch.utils import data
 from modules.efficient_backbone import EfficientBackbone
 from modules.metrics import *
-import torchvision
 import torch
 import numpy as np
-import random
 import time
 import yaml
 from torch.nn import DataParallel
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from test import *
-from transform.rescale import Rescale
-from transform.to_tensor import ToTensor
-from transform.normalize import Normalize
-from torchvision.transforms import transforms
 from utils.visualizer import Visualizer
 from validate import calculate_acc
 from modules.focal_loss import FocalLoss
 from transform.train_transform import get_train_transform, get_val_transform
+from utils.util import load_model_state_dict
 
 CONFIG_PATH = "./configs"
-def save_model(model, save_path, name, iter_cnt):
+def save_model(model, save_path, name, iter_cnt, pretrain_cnt=0):
     save_name = os.path.join(save_path, name + '_' + str(iter_cnt) + '.pth')
-    torch.save(model, save_name)
+    torch.save(model.state_dict(), save_name)
     return save_name
 
 def load_config(config_name):
@@ -70,7 +63,7 @@ if __name__ == '__main__':
 
     model_config = config["model"]
     model = EfficientBackbone(model_config["backbone_name"], model_config["pretrain"])
-
+    load_model_state_dict(model, "./checkpoints/efficientnet-b4_6.pth")
     if model_config["metric"] == 'add_margin':
         metric_fc = AddMarginProduct(model_config["backbone_output"], model_config["num_classes"], s=30, m=0.35)
     elif model_config["metric"] == 'arc_margin':
@@ -135,5 +128,6 @@ if __name__ == '__main__':
             if acc >= best_acc:
                 best_acc = acc
                 save_model(model, config["checkpoints_path"], model_config["backbone_name"], i)
+                save_model(metric_fc, config["checkpoints_path"], "metric_fc", i)
             if config["display"]:
                 visualizer.display_current_results(iters, acc, name='test_acc')
