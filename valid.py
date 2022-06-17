@@ -15,6 +15,7 @@ def load_config(config_name):
     return config
 
 if __name__ == '__main__':
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     config = load_config("config.yaml")
     eval_config = config["evaluate"]
     eval_dataset_config = eval_config["dataset"]
@@ -30,6 +31,7 @@ if __name__ == '__main__':
                                 num_workers=eval_config["num_workers"])
     model = EfficientBackbone("efficientnet-b4", False)
     model = load_model_state_dict(model, "./checkpoints/efficientnet-b4_6.pth")
+    model = model.to(device)
     model.eval()
     acc, th = calculate_acc(model, val_dataset, valloader)
     print(acc)
