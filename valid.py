@@ -28,11 +28,19 @@ if __name__ == '__main__':
                                 batch_size=eval_config["batch_size"],
                                 shuffle=eval_config["shuffle"],
                                 num_workers=eval_config["num_workers"])
-    # model = EfficientBackbone("efficientnet-b4", True)
-    model = torch.load("./checkpoints/efficientnet-b4_6.pth")
+    model = EfficientBackbone("efficientnet-b4", False)
+    model_dict = torch.load("./checkpoints/efficientnet-b4_6.pth")
+    processed_dict = {}
+    print(len(model.state_dict()))
+    for k, k1 in zip(model_dict.keys(), model.state_dict().keys()):
+        # print(f"{k}, {k1}")
+        processed_dict[k1] = model_dict[k]
+    # print(len(processed_dict))
+    # print(len(model.state_dict()))
+    # model = torch.load("./checkpoints/efficientnet-b4_6.pth")
     # print(type(pretrain))
     # print(pretrain.__dict__)
-    # model.load_state_dict(torch.load("./checkpoints/efficientnet-b4_6.pth"))
+    model.load_state_dict(processed_dict)
     model.eval()
-    acc, th = calculate_acc(model, val_dataset, valloader)
-    print(acc)
+    # acc, th = calculate_acc(model, val_dataset, valloader)
+    # print(acc)
