@@ -1,6 +1,6 @@
 optimizer:
   name: Adam
-  lr: 0.001
+  lr: 0.0005
   weight_decay: 5e-4
 scheduler:
   name: ReduceLROnPlateau
@@ -19,7 +19,7 @@ train:
   print_freq: 10 # print info every N batch
   dataset:
     input_file: ./input_file/small_train_set.parquet
-    root_dir: /data/long.le3/image_matching/images/
+    root_dir: /home/longle/images/images/
     image_key: normalized_url_image
     label_key: train_label_new
   num_workers: 4
@@ -28,12 +28,12 @@ train:
   epochs: 300
   data_augmentation:
     output_shape: 380
-  save_interval: 5
+  save_interval: 1
 evaluate:
   batch_size: 8
   dataset:
-    input_file: ./input_file/small_val_set_pair.parquet # size: 500
-    root_dir: /data/long.le3/image_matching/images/
+    input_file: ./input_file/small_val_set_pair.parquet # size: 5000
+    root_dir: /home/longle/images/images/
     first_image_key: first_image_file_name
     second_image_key: second_image_file_name
     pair_key: pair_result
