@@ -26,8 +26,8 @@ from transform.train_transform import get_train_transform, get_val_transform
 
 CONFIG_PATH = "./configs"
 def save_model(model, save_path, name, iter_cnt):
-    save_name = os.path.join(save_path, name + '_' + str(iter_cnt) + '.pth')
-    torch.save(model.state_dict(), save_name)
+    save_name = os.path.join(save_path, name + '_' + str(iter_cnt) + 'new.pth')
+    torch.save(model, save_name)
     return save_name
 
 def load_config(config_name):
@@ -70,6 +70,7 @@ if __name__ == '__main__':
 
     model_config = config["model"]
     model = EfficientBackbone(model_config["backbone_name"], model_config["pretrain"])
+    model.load_state_dict(torch.load("./checkpoints/efficietnet-b4_6.pth"))
 
     if model_config["metric"] == 'add_margin':
         metric_fc = AddMarginProduct(model_config["backbone_output"], model_config["num_classes"], s=30, m=0.35)
