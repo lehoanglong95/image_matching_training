@@ -6,7 +6,7 @@ from transform.train_transform import get_val_transform
 from dataset.image_matching_val_dataset import ImageMatchingValDataset
 from torch.utils import data
 from validate import calculate_acc
-
+from utils.util import load_model_state_dict
 
 CONFIG_PATH = "./configs"
 def load_config(config_name):
@@ -29,18 +29,7 @@ if __name__ == '__main__':
                                 shuffle=eval_config["shuffle"],
                                 num_workers=eval_config["num_workers"])
     model = EfficientBackbone("efficientnet-b4", False)
-    model_dict = torch.load("./checkpoints/efficientnet-b4_6.pth")
-    processed_dict = {}
-    print(len(model.state_dict()))
-    for k, k1 in zip(model_dict.keys(), model.state_dict().keys()):
-        # print(f"{k}, {k1}")
-        processed_dict[k1] = model_dict[k]
-    # print(len(processed_dict))
-    # print(len(model.state_dict()))
-    # model = torch.load("./checkpoints/efficientnet-b4_6.pth")
-    # print(type(pretrain))
-    # print(pretrain.__dict__)
-    model.load_state_dict(processed_dict)
+    model = load_model_state_dict(model, "./checkpoints/efficientnet-b4_6.pth")
     model.eval()
-    # acc, th = calculate_acc(model, val_dataset, valloader)
-    # print(acc)
+    acc, th = calculate_acc(model, val_dataset, valloader)
+    print(acc)
