@@ -90,8 +90,6 @@ if __name__ == '__main__':
         metric_fc = DataParallel(metric_fc)
     model.to(device)
     metric_fc.to(device)
-    model.eval()
-    acc, th = calculate_acc(model, val_dataset, valloader)
     for i in range(train_config["epochs"]):
         model.train()
         for ii, data in enumerate(trainloader):
