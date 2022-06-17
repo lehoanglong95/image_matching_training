@@ -63,7 +63,6 @@ if __name__ == '__main__':
 
     model_config = config["model"]
     model = EfficientBackbone(model_config["backbone_name"], model_config["pretrain"])
-    load_model_state_dict(model, "./checkpoints/efficientnet-b4_6.pth")
     if model_config["metric"] == 'add_margin':
         metric_fc = AddMarginProduct(model_config["backbone_output"], model_config["num_classes"], s=30, m=0.35)
     elif model_config["metric"] == 'arc_margin':
@@ -91,6 +90,8 @@ if __name__ == '__main__':
         metric_fc = DataParallel(metric_fc)
     model.to(device)
     metric_fc.to(device)
+    model.eval()
+    acc, th = calculate_acc(model, val_dataset, valloader)
     for i in range(train_config["epochs"]):
         model.train()
         for ii, data in enumerate(trainloader):
