@@ -12,9 +12,6 @@ torch.cuda.empty_cache()
 
 if __name__ == '__main__':
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    dataset = ImageComparingDataset("./input_file/image_comparing_v1.parquet",
-                                   "main_image_url", "tiki_images", transform=get_val_transform())
-    data_loader = data.DataLoader(dataset, batch_size=8, shuffle=False, num_workers=4)
     model = EfficientBackbone("efficientnet-b4", False)
     model = load_model_state_dict(model, "./checkpoints/efficientnet-b4_28.pth")
     if torch.cuda.device_count() > 1:
@@ -22,22 +19,32 @@ if __name__ == '__main__':
     model = model.to(device)
     model.eval()
     cos = nn.CosineSimilarity(dim=1)
-    similarity_df = pd.DataFrame(columns=["shopee_id", "tiki_id", "cos_sim_score"])
-    for ii, data in enumerate(data_loader):
+    input_files = [f"image_comparing_v1_{i}.parquet" for i in range(54)]
+    for input_file in input_files:
         try:
-            shopee_image, tiki_image, shopee_ids, tiki_ids = data["shopee_image"], data["tiki_image"], \
-                                                           data["shopee_id"], data["tiki_id"]
-            shopee_image = shopee_image.type(torch.cuda.FloatTensor)
-            tiki_image = tiki_image.type(torch.cuda.FloatTensor)
-            shopee_feature = model(shopee_image)
-            tiki_feature = model(tiki_image)
-            cosine_similarity = cos(shopee_feature, tiki_feature).cpu().detach().numpy()
-            for shopee_id, tiki_id, score in zip(shopee_ids, tiki_ids, cosine_similarity):
-                similarity_df = similarity_df.append({"shopee_id": shopee_id, "tiki_id": tiki_id, "cos_sim_score": score}, ignore_index=True)
+            dataset = ImageComparingDataset(input_file,
+                                            "main_image_url", "tiki_images", transform=get_val_transform())
         except Exception as e:
             print(e)
-            similarity_df.to_parquet("./output/similarity_score_v1.parquet")
-    similarity_df.to_parquet("./output/similarity_score_v1.parquet")
+            continue
+        data_loader = data.DataLoader(dataset, batch_size=8, shuffle=False, num_workers=4)
+        similarity_df = pd.DataFrame(columns=["shopee_id", "tiki_id", "cos_sim_score"])
+        for ii, data in enumerate(data_loader):
+            try:
+                shopee_image, tiki_image, shopee_ids, tiki_ids = data["shopee_image"], data["tiki_image"], \
+                                                               data["shopee_id"], data["tiki_id"]
+                shopee_image = shopee_image.type(torch.cuda.FloatTensor)
+                tiki_image = tiki_image.type(torch.cuda.FloatTensor)
+                shopee_feature = model(shopee_image)
+                tiki_feature = model(tiki_image)
+                cosine_similarity = cos(shopee_feature, tiki_feature).cpu().detach().numpy()
+                for shopee_id, tiki_id, score in zip(shopee_ids, tiki_ids, cosine_similarity):
+                    similarity_df = similarity_df.append({"shopee_id": shopee_id, "tiki_id": tiki_id, "cos_sim_score": score}, ignore_index=True)
+            except Exception as e:
+                print(e)
+                similarity_df.to_parquet(f"./output/similarity_score_v1_{input_file}.parquet")
+                continue
+        similarity_df.to_parquet(f"./output/similarity_score_v1_{input_file}.parquet")
     # embeddings = np.concatenate(embeddings)
     # neigh.fit(embeddings)
     # image_distances, image_indices = neigh.kneighbors(embeddings)
