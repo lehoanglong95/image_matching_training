@@ -30,7 +30,7 @@ if __name__ == '__main__':
                                 shuffle=eval_config["shuffle"],
                                 num_workers=eval_config["num_workers"])
     model = EfficientBackbone("efficientnet-b4", False)
-    model = load_model_state_dict(model, "./checkpoints/efficientnet-b4_6.pth")
+    model = load_model_state_dict(model, "./checkpoints/efficientnet-b4_28.pth")
     model = model.to(device)
     model.eval()
     acc, th = calculate_acc(model, val_dataset, valloader)

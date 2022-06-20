@@ -7,7 +7,7 @@ from torch.utils import data
 import torch
 
 if __name__ == '__main__':
-    neigh = NearestNeighbors(n_neighbors=2)
+    neigh = NearestNeighbors(n_neighbors=2, metric='cosine')
     dataset = ImageMatchingDataset("./input_file/final_product_image_with_label_test_set.parquet",
                                    "/data/long.le3/image_matching/images",
                                    "normalized_url_image", "label", transform=get_val_transform())
