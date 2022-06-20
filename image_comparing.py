@@ -37,6 +37,7 @@ if __name__ == '__main__':
         except Exception as e:
             print(e)
             similarity_df.to_parquet("./output/similarity_score_v1.parquet")
+    similarity_df.to_parquet("./output/similarity_score_v1.parquet")
     # embeddings = np.concatenate(embeddings)
     # neigh.fit(embeddings)
     # image_distances, image_indices = neigh.kneighbors(embeddings)
