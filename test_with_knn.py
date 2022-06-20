@@ -5,6 +5,9 @@ from dataset.image_matching_dataset import ImageMatchingDataset
 from transform.train_transform import get_val_transform
 from torch.utils import data
 import torch
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
+from sklearn.metrics import f1_score
 
 if __name__ == '__main__':
     neigh = NearestNeighbors(n_neighbors=2, metric='cosine')
@@ -23,12 +26,16 @@ if __name__ == '__main__':
     embeddings = np.concatenate(embeddings)
     neigh.fit(embeddings)
     image_distances, image_indices = neigh.kneighbors(embeddings)
-    acc = 0
+    y_true = []
+    y_pred = []
     for idx, results in enumerate(image_indices):
-        for result in results:
-            if result != idx:
-                if dataset.df.iloc[idx]["label"] == dataset.df.iloc[result]["label"]:
-                    acc += 1
-    print(acc / len(dataset))
-
+        temp_results = set(results) - {idx}
+        y_true.append(dataset.df.iloc[idx]["label"])
+        if idx in temp_results:
+            y_pred.append(dataset.df.iloc[idx]["label"])
+        else:
+            y_pred.append(dataset.df.iloc[list(temp_results)[0]]["label"])
+    print(precision_score(y_true, y_pred, average="macro"))
+    print(recall_score(y_true, y_pred, average="macro"))
+    print(f1_score(y_true, y_pred, average="macro"))
 
