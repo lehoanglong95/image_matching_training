@@ -30,7 +30,7 @@ train:
     output_shape: 380
   save_interval: 1
 evaluate:
-  batch_size: 16
+  batch_size: 8
   dataset:
     input_file: ./input_file/small_val_set_pair.parquet # size: 5000
     root_dir: /home/longle/images/images/

@@ -10,6 +10,8 @@ from utils.util import load_model_state_dict
 import torch.nn as nn
 
 CONFIG_PATH = "./configs"
+torch.cuda.empty_cache()
+
 def load_config(config_name):
     with open(os.path.join(CONFIG_PATH, config_name)) as file:
         config = yaml.safe_load(file)
