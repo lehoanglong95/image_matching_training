@@ -42,10 +42,16 @@ if __name__ == '__main__':
     for idx, results in enumerate(image_indices):
         temp_results = set(results) - {idx}
         y_true.append(dataset.df.iloc[idx]["label"])
-        if idx in temp_results:
-            y_pred.append(dataset.df.iloc[idx]["label"])
-        else:
+        label = int(dataset.df.iloc[idx]["label"])
+        correct_idx = -1
+        for result in temp_results:
+            if dataset.df.iloc[result]["label"] == label:
+                correct_idx = result
+                break
+        if correct_idx == -1:
             y_pred.append(dataset.df.iloc[list(temp_results)[0]]["label"])
+        else:
+            y_pred.append(dataset.df.iloc[correct_idx]["label"])
     print(precision_score(y_true, y_pred, average="micro"))
     print(recall_score(y_true, y_pred, average="micro"))
     print(f1_score(y_true, y_pred, average="micro"))
