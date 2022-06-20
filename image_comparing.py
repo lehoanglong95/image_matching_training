@@ -38,8 +38,13 @@ if __name__ == '__main__':
                 shopee_feature = model(shopee_image)
                 tiki_feature = model(tiki_image)
                 cosine_similarity = cos(shopee_feature, tiki_feature).cpu().detach().numpy()
-                for shopee_id, tiki_id, score in zip(shopee_ids, tiki_ids, cosine_similarity):
-                    similarity_df = similarity_df.append({"shopee_id": shopee_id, "tiki_id": tiki_id, "cos_sim_score": score}, ignore_index=True)
+                temp_df = pd.DataFrame()
+                temp_df["shopee_id"] = shopee_ids
+                temp_df["tiki_id"] = tiki_ids
+                temp_df["cos_sim_score"] = cosine_similarity
+                similarity_df = pd.concat([similarity_df, temp_df])
+                # for shopee_id, tiki_id, score in zip(shopee_ids, tiki_ids, cosine_similarity):
+                #     similarity_df = similarity_df.append({"shopee_id": shopee_id, "tiki_id": tiki_id, "cos_sim_score": score}, ignore_index=True)
             except Exception as e:
                 print(e)
                 similarity_df.to_parquet(f"./output/similarity_score_v1_{input_file}.parquet")
