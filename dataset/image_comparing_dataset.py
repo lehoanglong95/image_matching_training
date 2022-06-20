@@ -7,6 +7,7 @@ from torch.utils.data import Dataset
 from skimage.color import gray2rgb
 import requests
 from io import BytesIO
+from utils.util import normalize_url
 
 class ImageComparingDataset(Dataset):
 
@@ -36,7 +37,7 @@ class ImageComparingDataset(Dataset):
         if torch.is_tensor(idx):
             idx = idx.tolist()
         first_image = io.imread(BytesIO(requests.get(self.df.iloc[idx][self.shopee_image_key]).content))
-        second_image = io.imread(BytesIO(requests.get(self.df.iloc[idx][self.tiki_image_key]).content))
+        second_image = io.imread(BytesIO(requests.get(self.df.iloc[idx][normalize_url(self.tiki_image_key)]).content))
         shopee_id = self.df.iloc[idx][self.shopee_id]
         tiki_id = self.df.iloc[idx][self.tiki_id]
         if len(first_image.shape) < 3:
