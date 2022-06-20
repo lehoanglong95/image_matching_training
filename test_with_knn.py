@@ -46,7 +46,7 @@ if __name__ == '__main__':
             y_pred.append(dataset.df.iloc[idx]["label"])
         else:
             y_pred.append(dataset.df.iloc[list(temp_results)[0]]["label"])
-    print(precision_score(y_true, y_pred, average="macro"))
-    print(recall_score(y_true, y_pred, average="macro"))
-    print(f1_score(y_true, y_pred, average="macro"))
+    print(precision_score(y_true, y_pred, average="micro"))
+    print(recall_score(y_true, y_pred, average="micro"))
+    print(f1_score(y_true, y_pred, average="micro"))
 
