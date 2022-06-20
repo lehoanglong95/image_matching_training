@@ -21,6 +21,7 @@ if __name__ == '__main__':
     cos = nn.CosineSimilarity(dim=1)
     input_files = [f"image_comparing_v1_{i}.parquet" for i in range(54)]
     for input_file in input_files:
+        print(f"PROCESSING {input_file}")
         try:
             dataset = ImageComparingDataset(input_file,
                                             "main_image_url", "tiki_images", transform=get_val_transform())

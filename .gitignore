@@ -5,3 +5,4 @@ checkpoints/
 .DS_Store
 input_file/image_comparing_v1.parquet
 image_comparing_v1_*.parquet
+output/*
