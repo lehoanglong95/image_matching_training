@@ -51,4 +51,4 @@ class ImageComparingDataset(Dataset):
         if self.transform:
             first_image = self.transform(image=first_image)
             second_image = self.transform(image=second_image)
-        return {"shopee_image": first_image, "tiki_image": second_image, "shopee_id": shopee_id, "tiki_id": tiki_id}
+        return {"shopee_image": first_image["image"], "tiki_image": second_image["image"], "shopee_id": shopee_id, "tiki_id": tiki_id}
