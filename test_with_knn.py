@@ -33,7 +33,7 @@ if __name__ == '__main__':
         data_input = data_input.type(torch.cuda.FloatTensor)
         label = label.type(torch.cuda.LongTensor)
         feature = model(data_input)
-        embeddings.append(feature)
+        embeddings.append(feature.cpu().detach().numpy())
     embeddings = np.concatenate(embeddings)
     neigh.fit(embeddings)
     image_distances, image_indices = neigh.kneighbors(embeddings)
