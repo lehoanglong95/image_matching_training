@@ -7,6 +7,7 @@ from dataset.image_matching_val_dataset import ImageMatchingValDataset
 from torch.utils import data
 from validate import calculate_acc
 from utils.util import load_model_state_dict
+import torch.nn as nn
 
 CONFIG_PATH = "./configs"
 def load_config(config_name):
@@ -31,6 +32,8 @@ if __name__ == '__main__':
                                 num_workers=eval_config["num_workers"])
     model = EfficientBackbone("efficientnet-b4", False)
     model = load_model_state_dict(model, "./checkpoints/efficientnet-b4_28.pth")
+    if torch.cuda.device_count() > 1:
+        model = nn.DataParallel(model)
     model = model.to(device)
     model.eval()
     acc, th = calculate_acc(model, val_dataset, valloader)
