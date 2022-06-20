@@ -12,13 +12,15 @@ from modules.efficient_backbone import EfficientBackbone
 from utils.util import load_model_state_dict
 import torch.nn as nn
 
+torch.cuda.empty_cache()
+
 if __name__ == '__main__':
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     neigh = NearestNeighbors(n_neighbors=2, metric='cosine')
     dataset = ImageMatchingDataset("./input_file/final_product_image_with_label_test_set.parquet",
                                    "/home/longle/images/images",
                                    "normalized_url_image", "label", transform=get_val_transform())
-    data_loader = data.DataLoader(dataset, batch_size=8, shuffle=False, num_workers=4)
+    data_loader = data.DataLoader(dataset, batch_size=4, shuffle=False, num_workers=4)
     model = EfficientBackbone("efficientnet-b4", False)
     model = load_model_state_dict(model, "./checkpoints/efficientnet-b4_28.pth")
     if torch.cuda.device_count() > 1:
