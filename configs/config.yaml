@@ -32,7 +32,7 @@ train:
 evaluate:
   batch_size: 8
   dataset:
-    input_file: ./input_file/small_val_set_pair.parquet # size: 5000
+    input_file: ./input_file/val_set_pair.parquet
     root_dir: /home/longle/images/images/
     first_image_key: first_image_file_name
     second_image_key: second_image_file_name
