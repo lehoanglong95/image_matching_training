@@ -8,14 +8,23 @@ import torch
 from sklearn.metrics import precision_score
 from sklearn.metrics import recall_score
 from sklearn.metrics import f1_score
+from modules.efficient_backbone import EfficientBackbone
+from utils.util import load_model_state_dict
+import torch.nn as nn
 
 if __name__ == '__main__':
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     neigh = NearestNeighbors(n_neighbors=2, metric='cosine')
     dataset = ImageMatchingDataset("./input_file/final_product_image_with_label_test_set.parquet",
-                                   "/data/long.le3/image_matching/images",
+                                   "/home/longle/images/images",
                                    "normalized_url_image", "label", transform=get_val_transform())
     data_loader = data.DataLoader(dataset, batch_size=8, shuffle=False, num_workers=4)
-    model = torch.load("./checkpoints/efficientnet-b4_0.pth")
+    model = EfficientBackbone("efficientnet-b4", False)
+    model = load_model_state_dict(model, "./checkpoints/efficientnet-b4_28.pth")
+    if torch.cuda.device_count() > 1:
+        model = nn.DataParallel(model)
+    model = model.to(device)
+    model.eval()
     embeddings = []
     for ii, data in enumerate(data_loader):
         data_input, label = data["image"], data["label"]
