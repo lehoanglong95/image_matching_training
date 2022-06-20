@@ -13,6 +13,7 @@ class ImageComparingDataset(Dataset):
 
     def __init__(self, input_file, shopee_image_key, tiki_image_key, shopee_id="id", tiki_id="tiki_ids", transform=None):
         self.df = self.__read_input_file(input_file)
+        self.df = self.df.dropna()
         # self.df = self.df.apply(lambda x: x.explode() if x.name in ["tiki_images", "tiki_ids"] else x)
         self.transform = transform
         self.shopee_image_key = shopee_image_key
@@ -36,19 +37,23 @@ class ImageComparingDataset(Dataset):
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
             idx = idx.tolist()
-        first_image = io.imread(BytesIO(requests.get(self.df.iloc[idx][self.shopee_image_key]).content))
-        second_image = io.imread(BytesIO(requests.get(normalize_url(self.df.iloc[idx][self.tiki_image_key])).content))
-        shopee_id = self.df.iloc[idx][self.shopee_id]
-        tiki_id = self.df.iloc[idx][self.tiki_id]
-        if len(first_image.shape) < 3:
-            first_image = gray2rgb(first_image)
-        if first_image.shape[2] == 4:
-            first_image = first_image[:, :, :3]
-        if len(second_image.shape) < 3:
-            second_image = gray2rgb(second_image)
-        if second_image.shape[2] == 4:
-            second_image = second_image[:, :, :3]
-        if self.transform:
-            first_image = self.transform(image=first_image)
-            second_image = self.transform(image=second_image)
-        return {"shopee_image": first_image["image"], "tiki_image": second_image["image"], "shopee_id": shopee_id, "tiki_id": tiki_id}
+        try:
+            first_image = io.imread(BytesIO(requests.get(self.df.iloc[idx][self.shopee_image_key]).content))
+            second_image = io.imread(BytesIO(requests.get(normalize_url(self.df.iloc[idx][self.tiki_image_key])).content))
+            shopee_id = self.df.iloc[idx][self.shopee_id]
+            tiki_id = self.df.iloc[idx][self.tiki_id]
+            if len(first_image.shape) < 3:
+                first_image = gray2rgb(first_image)
+            if first_image.shape[2] == 4:
+                first_image = first_image[:, :, :3]
+            if len(second_image.shape) < 3:
+                second_image = gray2rgb(second_image)
+            if second_image.shape[2] == 4:
+                second_image = second_image[:, :, :3]
+            if self.transform:
+                first_image = self.transform(image=first_image)
+                second_image = self.transform(image=second_image)
+            return {"shopee_image": first_image["image"], "tiki_image": second_image["image"], "shopee_id": shopee_id, "tiki_id": tiki_id}
+        except Exception as e:
+            print(f"image comparing exception: {e}")
+            return {"shopee_image": None, "tiki_image": None, "shopee_id": None, "tiki_id": None}
