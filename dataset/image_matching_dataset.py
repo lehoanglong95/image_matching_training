@@ -46,4 +46,5 @@ class ImageMatchingDataset(Dataset):
             image = image[:, :, :3]
         if self.transform:
             image = self.transform(image=image)
-        return {"image": image["image"], "label": self.df.iloc[idx][self.label_key]}
+        return {"image": image["image"], "label": self.df.iloc[idx][self.label_key],
+                "url_image": self.df.iloc[idx][self.image_key]}
