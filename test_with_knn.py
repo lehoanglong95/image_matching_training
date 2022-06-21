@@ -30,14 +30,12 @@ if __name__ == '__main__':
     model = model.to(device)
     model.eval()
     embeddings = []
-    di = {}
     for ii, data in enumerate(data_loader):
         data_input, label, url_image = data["image"], data["label"], data["url_image"]
         data_input = data_input.type(torch.cuda.FloatTensor)
         label = label.type(torch.cuda.LongTensor)
         feature = model(data_input)
         embeddings.append(feature.cpu().detach().numpy())
-        di[ii] = url_image
     embeddings = np.concatenate(embeddings)
     neigh.fit(embeddings)
     image_distances, image_indices = neigh.kneighbors(embeddings)
@@ -47,13 +45,14 @@ if __name__ == '__main__':
     for idx, results in enumerate(image_indices):
         try:
             temp_df = pd.DataFrame()
-            temp_df["normalized_url_image"] = di[idx]
-            temp_df["duplicated"] = [di[ee] for ee in results]
+            self_image = dataset.df.iloc[idx]["normalized_url_image"]
+            temp_df["normalized_url_image"] = self_image
+            temp_df["duplicated"] = dataset.df.loc[results]["normalized_url_image"].values
             temp_results = set(results) - {idx}
             y_true.append(dataset.df.iloc[idx]["label"])
             label = int(dataset.df.iloc[idx]["label"])
             abc = dataset.df[dataset.df["label"] == label]["normalized_url_image"].values
-            correct_image = set(abc) - set(di[idx])
+            correct_image = set(abc) - set([self_image])
             correct_idx = -1
             for result in temp_results:
                 if dataset.df.iloc[result]["label"] == label:

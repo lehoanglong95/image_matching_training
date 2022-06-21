@@ -45,3 +45,11 @@ def normalize_url(url):
     except Exception as e:
         print(url)
         return ""
+
+def to_list(val): return [val]
+
+def get_top_3(val):
+    try:
+        return val[:3]
+    except:
+        return val
