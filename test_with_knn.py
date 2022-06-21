@@ -36,7 +36,8 @@ if __name__ == '__main__':
         data_input, label, url_image = data["image"], data["label"], data["url_image"]
         data_input = data_input.type(torch.cuda.FloatTensor)
         feature = model(data_input)
-        url_l.append(url_image.split("/")[-1])
+        temp_url_image = [e.split("/")[-1] for e in url_image]
+        url_l.append(temp_url_image)
         labels_l.append(label.cpu().detach().numpy())
         embeddings.append(feature.cpu().detach().numpy())
     embeddings = np.concatenate(embeddings)
