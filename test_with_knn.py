@@ -53,7 +53,10 @@ if __name__ == '__main__':
             temp_df = pd.DataFrame()
             self_image = di[idx]
             temp_df["normalized_url_image"] = [self_image]
-            temp_df["duplicated"] = [[di[ee] for ee in results]]
+            duplicated = [di[ee] for ee in results]
+            temp_df["duplicated_1"] = [duplicated[0]]
+            temp_df["duplicated_2"] = [duplicated[1]]
+            temp_df["duplicated_3"] = [duplicated[2]]
             temp_results = set(results) - {idx}
             y_true.append(labels[idx])
             label = int(labels[idx])
