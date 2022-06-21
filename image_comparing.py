@@ -32,7 +32,7 @@ if __name__ == '__main__':
         similarity_df = pd.DataFrame(columns=["shopee_id", "tiki_id", "cos_sim_score"])
         for ii, data in enumerate(data_loader):
             try:
-                if data["shopee_ids"] == -1:
+                if data["shopee_id"] == -1:
                     continue
                 shopee_image, tiki_image, shopee_ids, tiki_ids = data["shopee_image"], data["tiki_image"], \
                                                                data["shopee_id"], data["tiki_id"]
