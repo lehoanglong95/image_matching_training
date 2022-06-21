@@ -37,11 +37,16 @@ class ImageComparingDataset(Dataset):
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
             idx = idx.tolist()
-        shopee_id = self.df.iloc[idx][self.shopee_id]
-        tiki_id = self.df.iloc[idx][self.tiki_id]
         try:
+            shopee_id = self.df.iloc[idx][self.shopee_id]
+            tiki_id = self.df.iloc[idx][self.tiki_id]
+            tiki_image = normalize_url(self.df.iloc[idx][self.tiki_image_key])
+            if tiki_image == "":
+                print(shopee_id)
+                return {"shopee_image": torch.zeros((3, 380, 380)), "tiki_image": torch.zeros((3, 380, 380)),
+                        "shopee_id": -1, "tiki_id": -1}
             first_image = io.imread(BytesIO(requests.get(self.df.iloc[idx][self.shopee_image_key]).content))
-            second_image = io.imread(BytesIO(requests.get(normalize_url(self.df.iloc[idx][self.tiki_image_key])).content))
+            second_image = io.imread(BytesIO(requests.get(tiki_image).content))
             if len(first_image.shape) < 3:
                 first_image = gray2rgb(first_image)
             if first_image.shape[2] == 4:
