@@ -10,6 +10,8 @@ class ImageMatchingDataset(Dataset):
 
     def __init__(self, input_file, root_dir, image_key, label_key, transform=None):
         self.df = self.__read_input_file(input_file)
+        self.df = self.df.reset_index()
+        del self.df["index"]
         # l = [4308, 92, 4177, 11083, 828]
         # train_label_di = {l[idx]: idx for idx in range(len(l))}
         # def get_train_label(val):

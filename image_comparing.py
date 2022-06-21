@@ -19,7 +19,7 @@ if __name__ == '__main__':
     model = model.to(device)
     model.eval()
     cos = nn.CosineSimilarity(dim=1)
-    input_files = [f"input_file/image_comparing_v1_{i}.parquet" for i in range(34, 54)]
+    input_files = [f"input_file/image_comparing_v1_{i}.parquet" for i in range(37, 54)]
     for input_file in input_files:
         print(f"PROCESSING {input_file}")
         try:

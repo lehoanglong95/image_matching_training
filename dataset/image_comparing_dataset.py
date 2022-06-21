@@ -14,20 +14,12 @@ class ImageComparingDataset(Dataset):
     def __init__(self, input_file, shopee_image_key, tiki_image_key, shopee_id="id", tiki_id="tiki_ids", transform=None):
         self.df = self.__read_input_file(input_file)
         self.df = self.df.dropna()
-        self.df = self._get_top_3(self.df)
-        # self.df = self.df.apply(lambda x: x.explode() if x.name in ["tiki_images", "tiki_ids"] else x)
+        self.df = self.df.groupby("id").head(3)
         self.transform = transform
         self.shopee_image_key = shopee_image_key
         self.tiki_image_key = tiki_image_key
         self.shopee_id = shopee_id
         self.tiki_id = tiki_id
-
-    def _get_top_3(self, df):
-        df["tiki_ids"] = df["tiki_ids"].apply(to_list)
-        df = df.groupby("id").agg({"tiki_ids": "sum"})
-        df["tiki_ids"] = df["tiki_ids"].apply(get_top_3)
-        df = df.apply(lambda x: x.explode() if x.name in ["tiki_ids"] else x)
-        return df
 
     def __read_input_file(self, input_file):
         extension_input_file = os.path.splitext(input_file)[-1][1:]
