@@ -45,24 +45,30 @@ if __name__ == '__main__':
     y_pred = []
     similarity_df = pd.DataFrame(columns=["normalized_url_image", "duplicated", "correct_image"])
     for idx, results in enumerate(image_indices):
-        temp_df = pd.DataFrame()
-        temp_df["normalized_url_image"] = di[idx]
-        temp_df["duplicated"] = [di[ee] for ee in results]
-        temp_results = set(results) - {idx}
-        y_true.append(dataset.df.iloc[idx]["label"])
-        label = int(dataset.df.iloc[idx]["label"])
-        correct_image = set(dataset.df[dataset.df["label"] == label]["normalized_url_image"].values) - set(di[idx])
-        correct_idx = -1
-        for result in temp_results:
-            if dataset.df.iloc[result]["label"] == label:
-                correct_idx = result
-                break
-        if correct_idx == -1:
-            y_pred.append(dataset.df.iloc[list(temp_results)[0]]["label"])
-        else:
-            y_pred.append(dataset.df.iloc[correct_idx]["label"])
-        temp_df["correct_image"] = list(correct_image)[0]
-        similarity_df = pd.concat([similarity_df, temp_df])
+        try:
+            temp_df = pd.DataFrame()
+            temp_df["normalized_url_image"] = di[idx]
+            temp_df["duplicated"] = [di[ee] for ee in results]
+            temp_results = set(results) - {idx}
+            y_true.append(dataset.df.iloc[idx]["label"])
+            label = int(dataset.df.iloc[idx]["label"])
+            abc = dataset.df[dataset.df["label"] == label]["normalized_url_image"].values
+            correct_image = set(abc) - set(di[idx])
+            correct_idx = -1
+            for result in temp_results:
+                if dataset.df.iloc[result]["label"] == label:
+                    correct_idx = result
+                    break
+            if correct_idx == -1:
+                y_pred.append(dataset.df.iloc[list(temp_results)[0]]["label"])
+            else:
+                y_pred.append(dataset.df.iloc[correct_idx]["label"])
+            temp_df["correct_image"] = list(correct_image)[0]
+            similarity_df = pd.concat([similarity_df, temp_df])
+        except:
+            label = int(dataset.df.iloc[idx]["label"])
+            print(label)
+            break
     y_true = np.array(y_true)
     y_pred = np.array(y_pred)
     error_indices = np.where(y_pred != y_true)
