@@ -27,14 +27,24 @@ if __name__ == '__main__':
         except Exception as e:
             print(e)
             continue
-        data_loader = data.DataLoader(dataset, batch_size=1, shuffle=False, num_workers=4)
+        data_loader = data.DataLoader(dataset, batch_size=12, shuffle=False, num_workers=4)
         similarity_df = pd.DataFrame(columns=["shopee_id", "tiki_id", "cos_sim_score"])
         for ii, data in enumerate(data_loader):
             try:
-                if data["shopee_id"] == -1:
-                    continue
                 shopee_image, tiki_image, shopee_ids, tiki_ids = data["shopee_image"], data["tiki_image"], \
                                                                data["shopee_id"], data["tiki_id"]
+                error_indices = torch.where(shopee_ids == -1)[0]
+                if len(error_indices) > 0:
+                    shopee_ids = shopee_ids[shopee_ids != -1]
+                    tiki_ids = tiki_ids[tiki_ids != -1]
+                    shopee_image_l = []
+                    tiki_image_l = []
+                    for idx in range(len(shopee_image)):
+                        if idx not in error_indices:
+                            shopee_image_l.append(shopee_image[idx])
+                            tiki_image_l.append(tiki_image[idx])
+                    shopee_image = torch.stack(shopee_image_l)
+                    tiki_image = torch.stack(tiki_image_l)
                 shopee_image = shopee_image.type(torch.cuda.FloatTensor)
                 tiki_image = tiki_image.type(torch.cuda.FloatTensor)
                 shopee_feature = model(shopee_image)
