@@ -36,7 +36,7 @@ if __name__ == '__main__':
         data_input, label, url_image = data["image"], data["label"], data["url_image"]
         data_input = data_input.type(torch.cuda.FloatTensor)
         feature = model(data_input)
-        url_l.append(url_image)
+        url_l.append(url_image.split("/")[-1])
         labels_l.append(label.cpu().detach().numpy())
         embeddings.append(feature.cpu().detach().numpy())
     embeddings = np.concatenate(embeddings)
@@ -57,8 +57,8 @@ if __name__ == '__main__':
             y_true.append(labels[idx])
             label = int(labels[idx])
             abc = dataset.df[dataset.df["label"] == label]["normalized_url_image"].values
-            correct_image = set(abc) - set([self_image])
-            print(correct_image)
+            deg = [e.split("/")[-1] for e in abc]
+            correct_image = set(deg) - set([self_image])
             correct_idx = -1
             for result in temp_results:
                 if dataset.df.iloc[result]["label"] == label:
@@ -78,7 +78,7 @@ if __name__ == '__main__':
     y_true = np.array(y_true)
     y_pred = np.array(y_pred)
     error_indices = np.where(y_pred != y_true)
-    np.save(f"output/error_indices_{number_of_neighbors}.npy", error_indices)
+    # np.save(f"output/error_indices_{number_of_neighbors}.npy", error_indices)
     similarity_df.to_parquet(f"output/similarity_df_{number_of_neighbors}.parquet", index=False)
     print(precision_score(y_true, y_pred, average="micro"))
     print(recall_score(y_true, y_pred, average="micro"))
