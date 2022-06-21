@@ -22,7 +22,7 @@ if __name__ == '__main__':
     dataset = ImageMatchingDataset("./input_file/final_product_image_with_label_test_set.parquet",
                                    "/home/longle/images/images",
                                    "normalized_url_image", "label", transform=get_val_transform())
-    data_loader = data.DataLoader(dataset, batch_size=4, shuffle=False, num_workers=4)
+    data_loader = data.DataLoader(dataset, batch_size=1, shuffle=False, num_workers=4)
     model = EfficientBackbone("efficientnet-b4", False)
     model = load_model_state_dict(model, "./checkpoints/efficientnet-b4_28.pth")
     if torch.cuda.device_count() > 1:
@@ -30,11 +30,13 @@ if __name__ == '__main__':
     model = model.to(device)
     model.eval()
     embeddings = []
+    di = {}
     for ii, data in enumerate(data_loader):
         data_input, label, url_image = data["image"], data["label"], data["url_image"]
         data_input = data_input.type(torch.cuda.FloatTensor)
         label = label.type(torch.cuda.LongTensor)
         feature = model(data_input)
+        di[ii] = url_image
         embeddings.append(feature.cpu().detach().numpy())
     embeddings = np.concatenate(embeddings)
     neigh.fit(embeddings)
@@ -45,9 +47,9 @@ if __name__ == '__main__':
     for idx, results in enumerate(image_indices):
         try:
             temp_df = pd.DataFrame()
-            self_image = dataset.df.iloc[idx]["normalized_url_image"]
+            self_image = di[idx]
             temp_df["normalized_url_image"] = self_image
-            temp_df["duplicated"] = dataset.df.loc[results]["normalized_url_image"].values
+            temp_df["duplicated"] = [di[ee] for ee in results]
             temp_results = set(results) - {idx}
             y_true.append(dataset.df.iloc[idx]["label"])
             label = int(dataset.df.iloc[idx]["label"])
