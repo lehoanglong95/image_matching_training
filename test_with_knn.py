@@ -30,13 +30,15 @@ if __name__ == '__main__':
     model = model.to(device)
     model.eval()
     embeddings = []
-    di = {}
+    di = []
+    labels = []
     for ii, data in enumerate(data_loader):
         data_input, label, url_image = data["image"], data["label"], data["url_image"]
         data_input = data_input.type(torch.cuda.FloatTensor)
         label = label.type(torch.cuda.LongTensor)
         feature = model(data_input)
-        di[ii] = url_image
+        di.append(url_image)
+        labels.append(label)
         embeddings.append(feature.cpu().detach().numpy())
     embeddings = np.concatenate(embeddings)
     neigh.fit(embeddings)
@@ -51,10 +53,11 @@ if __name__ == '__main__':
             temp_df["normalized_url_image"] = self_image
             temp_df["duplicated"] = [di[ee] for ee in results]
             temp_results = set(results) - {idx}
-            y_true.append(dataset.df.iloc[idx]["label"])
-            label = int(dataset.df.iloc[idx]["label"])
+            y_true.append(labels[idx])
+            label = int(labels[idx])
             abc = dataset.df[dataset.df["label"] == label]["normalized_url_image"].values
             correct_image = set(abc) - set([self_image])
+            print(correct_image)
             correct_idx = -1
             for result in temp_results:
                 if dataset.df.iloc[result]["label"] == label:
@@ -66,7 +69,8 @@ if __name__ == '__main__':
                 y_pred.append(dataset.df.iloc[correct_idx]["label"])
             temp_df["correct_image"] = list(correct_image)[0]
             similarity_df = pd.concat([similarity_df, temp_df])
-        except:
+        except Exception as e:
+            print(e)
             label = int(dataset.df.iloc[idx]["label"])
             print(label)
             break
