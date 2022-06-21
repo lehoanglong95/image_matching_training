@@ -1,7 +1,7 @@
 import numpy as np
 from dataset.image_comparing_dataset import ImageComparingDataset
 from transform.train_transform import get_val_transform
-from torch.utils import data
+from torch.utils import data as torch_data
 import torch
 from modules.efficient_backbone import EfficientBackbone
 from utils.util import load_model_state_dict
@@ -19,7 +19,7 @@ if __name__ == '__main__':
     model = model.to(device)
     model.eval()
     cos = nn.CosineSimilarity(dim=1)
-    input_files = [f"image_comparing_v1_{i}.parquet" for i in range(54)]
+    input_files = [f"input_file/image_comparing_v1_{i}.parquet" for i in range(34, 54)]
     for input_file in input_files:
         print(f"PROCESSING {input_file}")
         try:
@@ -28,9 +28,10 @@ if __name__ == '__main__':
         except Exception as e:
             print(e)
             continue
-        data_loader = data.DataLoader(dataset, batch_size=8, shuffle=False, num_workers=20)
+        data_loader = torch_data.DataLoader(dataset, batch_size=4, shuffle=False, num_workers=8)
         similarity_df = pd.DataFrame(columns=["shopee_id", "tiki_id", "cos_sim_score"])
         le = len(data_loader)
+        file_name = input_file.split("/")[-1]
         for ii, data in enumerate(data_loader):
             try:
                 print(f"{ii} / {le}")
@@ -62,9 +63,9 @@ if __name__ == '__main__':
                 #     similarity_df = similarity_df.append({"shopee_id": shopee_id, "tiki_id": tiki_id, "cos_sim_score": score}, ignore_index=True)
             except Exception as e:
                 print(e)
-                similarity_df.to_parquet(f"./output/similarity_score_v1_{input_file}.parquet")
+                similarity_df.to_parquet(f"./output/similarity_score_v1_{file_name}.parquet")
                 continue
-        similarity_df.to_parquet(f"./output/similarity_score_v1_{input_file}.parquet")
+        similarity_df.to_parquet(f"./output/similarity_score_v1_{file_name}.parquet")
     # embeddings = np.concatenate(embeddings)
     # neigh.fit(embeddings)
     # image_distances, image_indices = neigh.kneighbors(embeddings)

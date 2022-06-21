@@ -16,7 +16,8 @@ torch.cuda.empty_cache()
 
 if __name__ == '__main__':
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    neigh = NearestNeighbors(n_neighbors=2, metric='cosine')
+    number_of_neighbors = 1
+    neigh = NearestNeighbors(n_neighbors=(number_of_neighbors + 1), metric='cosine')
     dataset = ImageMatchingDataset("./input_file/final_product_image_with_label_test_set.parquet",
                                    "/home/longle/images/images",
                                    "normalized_url_image", "label", transform=get_val_transform())
@@ -52,6 +53,8 @@ if __name__ == '__main__':
             y_pred.append(dataset.df.iloc[list(temp_results)[0]]["label"])
         else:
             y_pred.append(dataset.df.iloc[correct_idx]["label"])
+    error_indices = np.where(y_pred != y_true)
+    np.save(f"output/error_indices_{number_of_neighbors}.npy", error_indices)
     print(precision_score(y_true, y_pred, average="micro"))
     print(recall_score(y_true, y_pred, average="micro"))
     print(f1_score(y_true, y_pred, average="micro"))
