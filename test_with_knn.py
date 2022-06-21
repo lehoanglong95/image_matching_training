@@ -22,7 +22,7 @@ if __name__ == '__main__':
     dataset = ImageMatchingDataset("./input_file/final_product_image_with_label_test_set.parquet",
                                    "/home/longle/images/images",
                                    "normalized_url_image", "label", transform=get_val_transform())
-    data_loader = data.DataLoader(dataset, batch_size=1, shuffle=False, num_workers=4)
+    data_loader = data.DataLoader(dataset, batch_size=8, shuffle=False, num_workers=4)
     model = EfficientBackbone("efficientnet-b4", False)
     model = load_model_state_dict(model, "./checkpoints/efficientnet-b4_28.pth")
     if torch.cuda.device_count() > 1:
@@ -30,17 +30,18 @@ if __name__ == '__main__':
     model = model.to(device)
     model.eval()
     embeddings = []
-    di = []
-    labels = []
+    url_l = []
+    labels_l = []
     for ii, data in enumerate(data_loader):
         data_input, label, url_image = data["image"], data["label"], data["url_image"]
         data_input = data_input.type(torch.cuda.FloatTensor)
-        label = label.type(torch.cuda.LongTensor)
         feature = model(data_input)
         di.append(url_image)
-        labels.append(label)
+        labels.append(label.cpu().detach().numpy())
         embeddings.append(feature.cpu().detach().numpy())
     embeddings = np.concatenate(embeddings)
+    di = np.concatenate(url_l)
+    labels = np.concatenate(labels_l)
     neigh.fit(embeddings)
     image_distances, image_indices = neigh.kneighbors(embeddings)
     y_true = []
@@ -50,8 +51,8 @@ if __name__ == '__main__':
         try:
             temp_df = pd.DataFrame()
             self_image = di[idx]
-            temp_df["normalized_url_image"] = self_image
-            temp_df["duplicated"] = [di[ee] for ee in results]
+            temp_df["normalized_url_image"] = [self_image]
+            temp_df["duplicated"] = [[di[ee] for ee in results]]
             temp_results = set(results) - {idx}
             y_true.append(labels[idx])
             label = int(labels[idx])
@@ -67,7 +68,7 @@ if __name__ == '__main__':
                 y_pred.append(dataset.df.iloc[list(temp_results)[0]]["label"])
             else:
                 y_pred.append(dataset.df.iloc[correct_idx]["label"])
-            temp_df["correct_image"] = list(correct_image)[0]
+            temp_df["correct_image"] = list(correct_image)
             similarity_df = pd.concat([similarity_df, temp_df])
         except Exception as e:
             print(e)
