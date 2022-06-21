@@ -63,8 +63,11 @@ if __name__ == '__main__':
             y_pred.append(dataset.df.iloc[correct_idx]["label"])
         temp_df["correct_image"] = list(correct_image)[0]
         similarity_df = pd.concat([similarity_df, temp_df])
+    y_true = np.array(y_true)
+    y_pred = np.array(y_pred)
     error_indices = np.where(y_pred != y_true)
     np.save(f"output/error_indices_{number_of_neighbors}.npy", error_indices)
+    similarity_df.to_parquet(f"output/similarity_df_{number_of_neighbors}.parquet", index=False)
     print(precision_score(y_true, y_pred, average="micro"))
     print(recall_score(y_true, y_pred, average="micro"))
     print(f1_score(y_true, y_pred, average="micro"))
