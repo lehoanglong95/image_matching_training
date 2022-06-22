@@ -17,7 +17,7 @@ torch.cuda.empty_cache()
 
 if __name__ == '__main__':
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    number_of_neighbors = 3
+    number_of_neighbors = 20
     neigh = NearestNeighbors(n_neighbors=(number_of_neighbors + 1), metric='cosine')
     dataset = ImageMatchingDataset("./input_file/final_product_image_with_label_test_set.parquet",
                                    "/home/longle/images/images",
@@ -54,9 +54,8 @@ if __name__ == '__main__':
             self_image = di[idx]
             temp_df["normalized_url_image"] = [self_image]
             duplicated = [di[ee] for ee in results]
-            temp_df["duplicated_1"] = [duplicated[0]]
-            temp_df["duplicated_2"] = [duplicated[1]]
-            temp_df["duplicated_3"] = [duplicated[2]]
+            for i in range(len(duplicated)):
+                temp_df[f"duplicated_{i}"] = [duplicated[i]]
             temp_results = set(results) - {idx}
             y_true.append(labels[idx])
             label = int(labels[idx])
@@ -79,12 +78,12 @@ if __name__ == '__main__':
             label = int(dataset.df.iloc[idx]["label"])
             print(label)
             break
-    y_true = np.array(y_true)
-    y_pred = np.array(y_pred)
-    error_indices = np.where(y_pred != y_true)
+    # y_true = np.array(y_true)
+    # y_pred = np.array(y_pred)
+    # error_indices = np.where(y_pred != y_true)
     # np.save(f"output/error_indices_{number_of_neighbors}.npy", error_indices)
     similarity_df.to_parquet(f"output/similarity_df_{number_of_neighbors}.parquet", index=False)
-    print(precision_score(y_true, y_pred, average="micro"))
-    print(recall_score(y_true, y_pred, average="micro"))
-    print(f1_score(y_true, y_pred, average="micro"))
+    # print(precision_score(y_true, y_pred, average="micro"))
+    # print(recall_score(y_true, y_pred, average="micro"))
+    # print(f1_score(y_true, y_pred, average="micro"))
 
