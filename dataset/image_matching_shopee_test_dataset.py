@@ -29,7 +29,7 @@ class ImageMatchingShopeeTestDataset(Dataset):
         return pd.DataFrame()
 
     def __len__(self):
-        return len(self.image_url_df)
+        return len(self.df)
 
     def __getitem__(self, idx):
         if torch.is_tensor(idx):

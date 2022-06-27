@@ -50,10 +50,14 @@ if __name__ == '__main__':
     for idx, (indices, distance) in enumerate(zip(image_indices, image_distances)):
         try:
             temp_df = pd.DataFrame()
-            ids = np.where(distance < 0.37)[0]
-            temp_df["posting_id"] = posting_ids[idx]
-            temp_df["predict"] = posting_ids[indices[ids]]
-            temp_df["image"] = urls[idx]
+            threshold = 0.37
+            ids = np.where(distance < threshold)[0]
+            while len(ids) < 2:
+                threshold += 0.05
+                ids = np.where(distance < threshold)[0]
+            temp_df["posting_id"] = [posting_ids[idx]]
+            temp_df["predict"] = [posting_ids[indices[ids]]]
+            temp_df["image"] = [urls[idx]]
             # self_image = di[idx]
             # temp_df["normalized_url_image"] = [self_image]
             # duplicated = [di[ee] for ee in results]
