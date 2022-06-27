@@ -1,6 +1,6 @@
 optimizer:
   name: Adam
-  lr: 1e-3
+  lr: 0.001
   weight_decay: 5e-4
 scheduler:
   name: ReduceLROnPlateau
