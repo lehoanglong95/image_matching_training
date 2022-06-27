@@ -8,7 +8,7 @@ from skimage.color import gray2rgb
 
 class ImageMatchingDataset(Dataset):
 
-    def __init__(self, input_file, root_dir, image_key, label_key, transform=None):
+    def __init__(self, input_file, root_dir, image_key, label_key, data_source_key, transform=None):
         self.df = self.__read_input_file(input_file)
         self.df = self.df.reset_index()
         del self.df["index"]
@@ -23,6 +23,7 @@ class ImageMatchingDataset(Dataset):
         self.transform = transform
         self.image_key = image_key
         self.label_key = label_key
+        self.data_source_key = data_source_key
 
     def __read_input_file(self, input_file):
         extension_input_file = os.path.splitext(input_file)[-1][1:]
@@ -40,7 +41,8 @@ class ImageMatchingDataset(Dataset):
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
             idx = idx.tolist()
-        source_img_name = os.path.join(self.root_dir, self.df.iloc[idx][self.image_key].split("/")[-1])
+        source_img_name = os.path.join(self.root_dir[self.df.iloc[idx][self.data_source_key]],
+                                       self.df.iloc[idx][self.image_key].split("/")[-1])
         image = io.imread(source_img_name)
         if len(image.shape) < 3:
             image = gray2rgb(image)

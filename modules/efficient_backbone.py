@@ -9,8 +9,8 @@ class EfficientBackbone(nn.Module):
             self.backbone = EfficientNet.from_pretrained(backbone_name)
         else:
             self.backbone = EfficientNet.from_name(backbone_name)
-        self.last_layer = nn.AdaptiveAvgPool2d(1)
         self.batchnorm = nn.BatchNorm2d(1792)
+        self.last_layer = nn.AdaptiveAvgPool2d(1)
 
     def forward(self, input):
         output = self.backbone.extract_features(input)
@@ -18,3 +18,11 @@ class EfficientBackbone(nn.Module):
         output = self.last_layer(output)
         output = output.view(input.shape[0], -1)
         return output
+
+if __name__ == '__main__':
+    model = EfficientBackbone(pretrain=False)
+    a = []
+    for idx, e in enumerate(model.children()):
+        print(idx)
+        a.append(e)
+    print(len(a))

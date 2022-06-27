@@ -40,6 +40,7 @@ if __name__ == '__main__':
                                          dataset_config["root_dir"],
                                          dataset_config["image_key"],
                                          dataset_config["label_key"],
+                                         dataset_config["data_source_key"],
                                          get_train_transform())
     trainloader = data.DataLoader(train_dataset,
                                   batch_size=train_config["batch_size"],
@@ -63,6 +64,10 @@ if __name__ == '__main__':
 
     model_config = config["model"]
     model = EfficientBackbone(model_config["backbone_name"], model_config["pretrain"])
+    for idx, children_model in enumerate(model.children()):
+        if idx == 0:
+            for param in children_model.parameters():
+                param.requires_grad = False
     if model_config["metric"] == 'add_margin':
         metric_fc = AddMarginProduct(model_config["backbone_output"], model_config["num_classes"], s=30, m=0.35)
     elif model_config["metric"] == 'arc_margin':
@@ -91,6 +96,17 @@ if __name__ == '__main__':
     model.to(device)
     metric_fc.to(device)
     for i in range(train_config["epochs"]):
+        if i == 5:
+            for idx, children_model in enumerate(model.children()):
+                if idx == 0:
+                    for param in children_model.parameters():
+                        param.requires_grad = True
+            optimizer = torch.optim.Adam([{'params': model.parameters()}, {'params': metric_fc.parameters()}],
+                                         lr=config["optimizer"]["lr"] / 10,
+                                         weight_decay=float(config["optimizer"]["weight_decay"]))
+            scheduler = ReduceLROnPlateau(optimizer, mode=config["scheduler"]["mode"],
+                                          factor=config["scheduler"]["factor"],
+                                          patience=config["scheduler"]["patience"])
         model.train()
         for ii, data in enumerate(trainloader):
             data_input, label = data["image"], data["label"]
@@ -122,7 +138,8 @@ if __name__ == '__main__':
         if i % train_config["save_interval"] == 0 or i == train_config["epochs"]:
             model.eval()
             acc, th = calculate_acc(model, val_dataset, valloader)
-            scheduler.step(acc)
+            if i > 4:
+                scheduler.step(acc)
             print(f"epoch {i} with acc {acc} and th {th}")
             if acc >= best_acc:
                 best_acc = acc

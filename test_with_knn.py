@@ -56,7 +56,10 @@ if __name__ == '__main__':
                 threshold += 0.05
                 ids = np.where(distance < threshold)[0]
             temp_df["posting_id"] = [posting_ids[idx]]
-            temp_df["predict"] = [posting_ids[indices[ids]]]
+            temp_l = []
+            for e in posting_ids[indices[ids]]:
+                temp_l.append(str(e))
+            temp_df["predict"] = [list(temp_l)]
             temp_df["image"] = [urls[idx]]
             # self_image = di[idx]
             # temp_df["normalized_url_image"] = [self_image]
@@ -70,7 +73,7 @@ if __name__ == '__main__':
             # deg = [e.split("/")[-1] for e in abc]
             # correct_image = set(deg) - set([self_image])
             # correct_idx = -1
-            # for result in temp_results:
+            # for result in temp_results:Ï
             #     if dataset.df.iloc[result]["label"] == label:
             #         correct_idx = result
             #         break
