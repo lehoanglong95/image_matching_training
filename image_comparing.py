@@ -19,17 +19,18 @@ if __name__ == '__main__':
     model = model.to(device)
     model.eval()
     cos = nn.CosineSimilarity(dim=1)
-    input_files = [f"input_file/image_comparing_v1_{i}.parquet" for i in range(47, 54)]
+    input_files = [f"input_file/distinct_id_newest.parquet" for i in range(47, 54)]
     for input_file in input_files:
         print(f"PROCESSING {input_file}")
         try:
             dataset = ImageComparingDataset(input_file,
-                                            "main_image_url", "tiki_images", transform=get_val_transform())
+                                            "main_image_url", "tiki_images", shopee_id="product_base_id",
+                                            transform=get_val_transform())
         except Exception as e:
             print(e)
             continue
         data_loader = torch_data.DataLoader(dataset, batch_size=4, shuffle=False, num_workers=8)
-        similarity_df = pd.DataFrame(columns=["shopee_id", "tiki_id", "cos_sim_score"])
+        similarity_df = pd.DataFrame(columns=["lazada_id", "tiki_id", "cos_sim_score"])
         le = len(data_loader)
         file_name = input_file.split("/")[-1]
         for ii, data in enumerate(data_loader):
@@ -55,7 +56,7 @@ if __name__ == '__main__':
                 tiki_feature = model(tiki_image)
                 cosine_similarity = cos(shopee_feature, tiki_feature).cpu().detach().numpy()
                 temp_df = pd.DataFrame()
-                temp_df["shopee_id"] = shopee_ids
+                temp_df["lazada_id"] = shopee_ids
                 temp_df["tiki_id"] = tiki_ids
                 temp_df["cos_sim_score"] = cosine_similarity
                 similarity_df = pd.concat([similarity_df, temp_df])

@@ -14,7 +14,7 @@ class ImageComparingDataset(Dataset):
     def __init__(self, input_file, shopee_image_key, tiki_image_key, shopee_id="id", tiki_id="tiki_ids", transform=None):
         self.df = self.__read_input_file(input_file)
         self.df = self.df.dropna()
-        self.df = self.df.groupby("id").head(3)
+        self.df = self.df.apply(lambda x: x.explode() if x.name in ["tiki_names", "tiki_ids", "tiki_images", "tiki_prices", "tiki_seller_ids", "tiki_models", "tiki_brands"] else x)
         self.transform = transform
         self.shopee_image_key = shopee_image_key
         self.tiki_image_key = tiki_image_key
