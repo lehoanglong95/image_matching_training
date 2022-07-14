@@ -63,7 +63,7 @@ if __name__ == '__main__':
         criterion = torch.nn.CrossEntropyLoss()
 
     model_config = config["model"]
-    model = EfficientBackbone(model_config["backbone_name"], model_config["pretrain"])
+    model = EfficientBackbone(model_config["backbone_name"], model_config["backbone_output"], model_config["pretrain"])
     for idx, children_model in enumerate(model.children()):
         if idx == 0:
             for param in children_model.parameters():
