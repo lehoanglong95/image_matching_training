@@ -8,11 +8,11 @@ scheduler:
   factor: 0.2
   patience: 5
 model:
-  backbone_name: efficientnet-b4
+  backbone_name: efficientnet-b2
   metric: arc_margin
   num_classes: 18463
   pretrain: True
-  backbone_output: 1792
+  backbone_output: 1408
 
 loss: focal_loss
 train:

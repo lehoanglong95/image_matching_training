@@ -3,13 +3,13 @@ import torch.nn as nn
 
 class EfficientBackbone(nn.Module):
 
-    def __init__(self, backbone_name="efficientnet-b4", pretrain=False):
+    def __init__(self, backbone_name="efficientnet-b4", backbone_output=1792, pretrain=False):
         super(EfficientBackbone, self).__init__()
         if pretrain:
             self.backbone = EfficientNet.from_pretrained(backbone_name)
         else:
             self.backbone = EfficientNet.from_name(backbone_name)
-        self.batchnorm = nn.BatchNorm2d(1792)
+        self.batchnorm = nn.BatchNorm2d(backbone_output)
         self.last_layer = nn.AdaptiveAvgPool2d(1)
 
     def forward(self, input):

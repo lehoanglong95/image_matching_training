@@ -7,3 +7,4 @@ input_file/image_comparing_v1.parquet
 input_file/test_set_df_list/*
 image_comparing_v1_*.parquet
 output/*
+input_file/*

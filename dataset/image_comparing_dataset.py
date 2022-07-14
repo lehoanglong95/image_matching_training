@@ -11,10 +11,15 @@ from utils.util import normalize_url, to_list, get_top_3
 
 class ImageComparingDataset(Dataset):
 
-    def __init__(self, input_file, shopee_image_key, tiki_image_key, shopee_id="id", tiki_id="tiki_ids", transform=None):
+    def __init__(self, input_file, shopee_image_key, tiki_image_key, shopee_id="itemid", tiki_id="tiki_ids", transform=None):
         self.df = self.__read_input_file(input_file)
-        self.df = self.df.dropna()
-        self.df = self.df.apply(lambda x: x.explode() if x.name in ["tiki_names", "tiki_ids", "tiki_images", "tiki_prices", "tiki_seller_ids", "tiki_models", "tiki_brands"] else x)
+        # self.df = self.df.dropna()
+        # self.df["id"] = self.df["product_base_id"].apply(lambda x: int(x.split("__")[1]))
+        # self.df = self.df.apply(lambda x: x.explode() if x.name in ["tiki_cat_ids", "tiki_cat_names", "tiki_names", "tiki_ids", "tiki_images", "tiki_prices", "tiki_seller_ids", "tiki_models", "tiki_brands"] else x)
+        self.df = self.df[[shopee_id, tiki_id, shopee_image_key, tiki_image_key]]
+        self.df = self.df.apply(lambda x: x.explode() if x.name in [tiki_id, tiki_image_key] else x)
+        # self.df = self.df[:280000]
+        self.df = self.df[::-1]
         self.transform = transform
         self.shopee_image_key = shopee_image_key
         self.tiki_image_key = tiki_image_key
@@ -37,8 +42,8 @@ class ImageComparingDataset(Dataset):
     def __getitem__(self, idx):
         if torch.is_tensor(idx):
             idx = idx.tolist()
+        shopee_id = self.df.iloc[idx][self.shopee_id]
         try:
-            shopee_id = self.df.iloc[idx][self.shopee_id]
             tiki_id = self.df.iloc[idx][self.tiki_id]
             tiki_image = normalize_url(self.df.iloc[idx][self.tiki_image_key])
             if tiki_image == "":
@@ -62,4 +67,4 @@ class ImageComparingDataset(Dataset):
         except Exception as e:
             print(f"image comparing exception: {e}")
             return {"shopee_image": torch.zeros((3, 380, 380)), "tiki_image": torch.zeros((3, 380, 380)),
-                    "shopee_id": -1, "tiki_id": -1}
+                    "shopee_id": shopee_id, "tiki_id": -1}
