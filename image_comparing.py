@@ -12,8 +12,8 @@ torch.cuda.empty_cache()
 
 if __name__ == '__main__':
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    model = EfficientBackbone("efficientnet-b4", False)
-    model = load_model_state_dict(model, "./checkpoints/efficientnet-b4_64.pth")
+    model = EfficientBackbone("efficientnet-b2", False)
+    model = load_model_state_dict(model, "./checkpoints/efficientnet-b2_46.pth")
     if torch.cuda.device_count() > 1:
         model = nn.DataParallel(model)
     model = model.to(device)
@@ -21,15 +21,16 @@ if __name__ == '__main__':
     cos = nn.CosineSimilarity(dim=1)
     # input_files = [f"input_file/distinct_id_newest.parquet" for i in range(47, 54)]
     # input_file = "input_file/distinct_id_get_newest_multi_categories.parquet"
-    input_file = "input_file/shopee_analytic_shopee_retrival_high_demand_output_shopee_item_prior_image_score_20220704_prior=1_v2_part-00009-d3ef2fcb-3a03-43bd-a6c8-5405d9b9c7b5.c000.snappy.parquet"
+    # input_file = "input_file/shopee_analytic_shopee_retrival_high_demand_output_shopee_item_prior_image_score_20220704_prior=1_v2_part-00009-d3ef2fcb-3a03-43bd-a6c8-5405d9b9c7b5.c000.snappy.parquet"
+    input_file = "input_file/high_demand_product_image_training_data.parquet"
     print(f"PROCESSING {input_file}")
     # try:
     dataset = ImageComparingDataset(input_file,
-                                    "main_image_url", "tiki_images",
-                                    transform=get_val_transform())
+                                    "main_image_url", "tiki_images", shopee_id="shopeeProductId",
+                                    tiki_id="tikiProductId", transform=get_val_transform())
     # except Exception as e:
     #     print(e)
-    data_loader = torch_data.DataLoader(dataset, batch_size=5, shuffle=False, num_workers=8)
+    data_loader = torch_data.DataLoader(dataset, batch_size=32, shuffle=False, num_workers=20)
     similarity_df = pd.DataFrame(columns=["lazada_id", "tiki_id", "cos_sim_score"])
     le = len(data_loader)
     file_name = input_file.split("/")[-1]
