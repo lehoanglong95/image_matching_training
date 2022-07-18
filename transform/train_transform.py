@@ -20,7 +20,7 @@ import torchvision.models as models
 def get_train_transform():
     train_transform = A.Compose(
         [
-            A.Resize(380, 380),
+            A.Resize(260, 260),
             A.RandomRotate90(),
             A.Flip(),
             A.Transpose(),
@@ -55,7 +55,7 @@ def get_train_transform():
 def get_val_transform():
     val_transform = A.Compose(
         [
-            A.Resize(380, 380),
+            A.Resize(260, 260),
             A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
             ToTensorV2(),
         ]

@@ -23,8 +23,8 @@ if __name__ == '__main__':
     dataset = ImageMatchingShopeeTestDataset("./input_file/x_test.csv",
                                    "/home/longle/shopee-product-matching/train_images", transform=get_val_transform())
     data_loader = data.DataLoader(dataset, batch_size=8, shuffle=False, num_workers=4)
-    model = EfficientBackbone("efficientnet-b4", False)
-    model = load_model_state_dict(model, "./checkpoints/efficientnet-b4_28.pth")
+    model = EfficientBackbone("efficientnet-b2", False)
+    model = load_model_state_dict(model, "./checkpoints/efficientnet-b2_46.pth")
     if torch.cuda.device_count() > 1:
         model = nn.DataParallel(model)
     model = model.to(device)
@@ -92,7 +92,7 @@ if __name__ == '__main__':
     # y_pred = np.array(y_pred)
     # error_indices = np.where(y_pred != y_true)
     # np.save(f"output/error_indices_{number_of_neighbors}.npy", error_indices)
-    similarity_df.to_parquet(f"output/shopee_similarity.parquet", index=False)
+    similarity_df.to_parquet(f"output/shopee_similarity_b2_46.parquet", index=False)
     # print(precision_score(y_true, y_pred, average="micro"))
     # print(recall_score(y_true, y_pred, average="micro"))
     # print(f1_score(y_true, y_pred, average="micro"))
