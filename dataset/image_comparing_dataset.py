@@ -17,6 +17,7 @@ class ImageComparingDataset(Dataset):
         # self.df["id"] = self.df["product_base_id"].apply(lambda x: int(x.split("__")[1]))
         # self.df = self.df.apply(lambda x: x.explode() if x.name in ["tiki_cat_ids", "tiki_cat_names", "tiki_names", "tiki_ids", "tiki_images", "tiki_prices", "tiki_seller_ids", "tiki_models", "tiki_brands"] else x)
         self.df = self.df[[shopee_id, tiki_id, shopee_image_key, tiki_image_key]]
+        # self.df = self.df[:700000]
         # self.df = self.df.apply(lambda x: x.explode() if x.name in [tiki_id, tiki_image_key] else x)
         # self.df = self.df[:280000]
         # self.df = self.df[::-1]
